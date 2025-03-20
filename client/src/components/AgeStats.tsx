@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { calculateAge } from "@/lib/dateUtils";
 
 interface AgeStatsProps {
@@ -9,24 +8,34 @@ export default function AgeStats({ birthDate }: AgeStatsProps) {
   const age = calculateAge(birthDate);
 
   return (
-    <Card className="bg-white border border-slate-200 rounded-lg">
-      <CardContent className="p-4">
-        <h3 className="font-medium mb-2">Your Life Stats</h3>
-        <ul className="space-y-1 text-sm">
-          <li>
-            Current Age: <span className="font-medium">{age.years} years, {age.months} months</span>
-          </li>
-          <li>
-            Weeks Lived: <span className="font-medium">{age.weeksLived.toLocaleString()}</span>
-          </li>
-          <li>
-            Months Lived: <span className="font-medium">{age.monthsTotal.toLocaleString()}</span>
-          </li>
-          <li>
-            Percentage of Life (to 100): <span className="font-medium">{age.percentComplete}%</span>
-          </li>
-        </ul>
-      </CardContent>
-    </Card>
+    <div className="mt-6">
+      <h2 className="text-lg font-medium mb-4">Your Life Statistics</h2>
+      
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+          <div className="text-sm text-slate-500 mb-1">Current Age</div>
+          <div className="text-xl font-bold">{age.years}<span className="text-base font-normal"> years</span></div>
+          <div className="text-sm text-slate-700">{age.months} months</div>
+        </div>
+        
+        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+          <div className="text-sm text-slate-500 mb-1">Weeks Lived</div>
+          <div className="text-xl font-bold">{age.weeksLived.toLocaleString()}</div>
+          <div className="text-sm text-slate-700">weeks</div>
+        </div>
+        
+        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+          <div className="text-sm text-slate-500 mb-1">Months Lived</div>
+          <div className="text-xl font-bold">{age.monthsTotal.toLocaleString()}</div>
+          <div className="text-sm text-slate-700">months</div>
+        </div>
+        
+        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+          <div className="text-sm text-slate-500 mb-1">Life Complete</div>
+          <div className="text-xl font-bold">{age.percentComplete}%</div>
+          <div className="text-sm text-slate-700">of 100 years</div>
+        </div>
+      </div>
+    </div>
   );
 }
