@@ -37,59 +37,78 @@ export default function DateSliders({ birthDate, setBirthDate }: DateSlidersProp
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="space-y-4">
-      {/* Day Slider */}
-      <div className="space-y-1">
-        <div className="flex justify-between">
-          <label htmlFor="day-slider" className="block text-sm font-medium text-slate-700">
-            Day: <span>{day}</span>
-          </label>
-        </div>
-        <Slider
-          id="day-slider"
-          min={1}
-          max={maxDays}
-          step={1}
-          value={[day]}
-          onValueChange={(value) => setDay(value[0])}
-          className="w-full"
-        />
-      </div>
+    <div className="space-y-6 mb-6">
+      <h2 className="text-lg font-medium mb-4">Birth Date Settings</h2>
       
-      {/* Month Slider */}
-      <div className="space-y-1">
-        <div className="flex justify-between">
-          <label htmlFor="month-slider" className="block text-sm font-medium text-slate-700">
-            Month: <span>{getMonthName(month - 1)}</span>
-          </label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+        {/* Day Slider */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <label htmlFor="day-slider" className="text-base font-medium">
+              Day
+            </label>
+            <span className="text-lg font-bold text-slate-900">{day}</span>
+          </div>
+          <Slider
+            id="day-slider"
+            min={1}
+            max={maxDays}
+            step={1}
+            value={[day]}
+            onValueChange={(value) => setDay(value[0])}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-slate-500">
+            <span>1</span>
+            <span>{maxDays}</span>
+          </div>
         </div>
-        <Slider
-          id="month-slider"
-          min={1}
-          max={12}
-          step={1}
-          value={[month]}
-          onValueChange={(value) => setMonth(value[0])}
-          className="w-full"
-        />
-      </div>
-      
-      {/* Year Slider */}
-      <div className="space-y-1">
-        <div className="flex justify-between">
-          <label htmlFor="year-slider" className="block text-sm font-medium text-slate-700">
-            Year: <span>{year}</span>
-          </label>
+        
+        {/* Month Slider */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <label htmlFor="month-slider" className="text-base font-medium">
+              Month
+            </label>
+            <span className="text-lg font-bold text-slate-900">{getMonthName(month - 1)}</span>
+          </div>
+          <Slider
+            id="month-slider"
+            min={1}
+            max={12}
+            step={1}
+            value={[month]}
+            onValueChange={(value) => setMonth(value[0])}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-slate-500">
+            <span>Jan</span>
+            <span>Dec</span>
+          </div>
         </div>
-        <Slider
-          id="year-slider"
-          min={currentYear - 100}
-          max={currentYear}
-          step={1}
-          value={[year]}
-          onValueChange={(value) => setYear(value[0])}
-          className="w-full"
-        />
+        
+        {/* Year Slider */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <label htmlFor="year-slider" className="text-base font-medium">
+              Year
+            </label>
+            <span className="text-lg font-bold text-slate-900">{year}</span>
+          </div>
+          <Slider
+            id="year-slider"
+            min={currentYear - 100}
+            max={currentYear}
+            step={1}
+            value={[year]}
+            onValueChange={(value) => setYear(value[0])}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-slate-500">
+            <span>{currentYear - 100}</span>
+            <span>{currentYear}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

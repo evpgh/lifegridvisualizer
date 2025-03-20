@@ -7,21 +7,29 @@ interface VisualizationToggleProps {
 
 export default function VisualizationToggle({ viewMode, setViewMode }: VisualizationToggleProps) {
   return (
-    <div className="mb-6">
-      <span className="text-sm font-medium text-slate-700 mr-3">View:</span>
-      <div className="inline-flex rounded-md shadow-sm" role="group">
+    <div className="mb-6 flex items-center">
+      <h2 className="text-lg font-medium mr-4">Visualization Mode</h2>
+      <div className="flex rounded-md shadow-sm" role="group">
         <Button
-          variant={viewMode === "weeks" ? "secondary" : "outline"}
-          size="sm"
-          className={`rounded-r-none ${viewMode === "weeks" ? "bg-blue-50 text-blue-700 hover:bg-blue-50 hover:text-blue-700" : ""}`}
+          variant={viewMode === "weeks" ? "default" : "outline"}
+          size="default"
+          className={`rounded-r-none border-r-0 min-w-[100px] ${
+            viewMode === "weeks" 
+            ? "bg-blue-600 text-white hover:bg-blue-700" 
+            : "hover:bg-slate-100"
+          }`}
           onClick={() => setViewMode("weeks")}
         >
           Weeks
         </Button>
         <Button
-          variant={viewMode === "months" ? "secondary" : "outline"}
-          size="sm"
-          className={`rounded-l-none ${viewMode === "months" ? "bg-blue-50 text-blue-700 hover:bg-blue-50 hover:text-blue-700" : ""}`}
+          variant={viewMode === "months" ? "default" : "outline"}
+          size="default"
+          className={`rounded-l-none min-w-[100px] ${
+            viewMode === "months" 
+            ? "bg-blue-600 text-white hover:bg-blue-700" 
+            : "hover:bg-slate-100"
+          }`}
           onClick={() => setViewMode("months")}
         >
           Months

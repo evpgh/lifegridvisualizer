@@ -16,17 +16,17 @@ export default function ControlPanel({
   setViewMode 
 }: ControlPanelProps) {
   return (
-    <div className="bg-slate-50 rounded-lg p-6 mb-8 shadow-sm">
-      <div className="grid gap-6 md:grid-cols-2">
+    <div className="bg-white border border-slate-200 rounded-xl p-6 mb-8 shadow-sm">
+      <div className="grid gap-8 md:grid-cols-2">
         <div>
-          <h2 className="text-lg font-medium mb-4">Your Birthday</h2>
           <DateSliders birthDate={birthDate} setBirthDate={setBirthDate} />
         </div>
         
-        <div>
-          <h2 className="text-lg font-medium mb-4">Visualization Settings</h2>
+        <div className="flex flex-col">
           <VisualizationToggle viewMode={viewMode} setViewMode={setViewMode} />
-          <AgeStats birthDate={birthDate} />
+          <div className="mt-auto">
+            <AgeStats birthDate={birthDate} />
+          </div>
         </div>
       </div>
     </div>
