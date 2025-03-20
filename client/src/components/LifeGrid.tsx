@@ -22,22 +22,34 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
       const isMobile = window.innerWidth < 768;
       const totalCols = viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR;
       
-      // Calculate desired grid width
-      // For mobile: almost full screen width (95%)
-      // For desktop: at least 500px or 50% of screen width, whichever is larger
-      const targetWidth = isMobile 
-        ? window.innerWidth * 0.95 
-        : Math.max(500, window.innerWidth * 0.5);
+      // Calculate available viewport dimensions
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
       
-      // Calculate block size based on target width
-      let newSize = Math.floor(targetWidth / totalCols) - (isMobile ? 0.5 : 1);
+      // Target dimensions - scale to fit screen nicely
+      // Use slightly less width to avoid horizontal scrolling
+      const targetWidth = isMobile ? viewportWidth * 0.9 : Math.min(viewportWidth * 0.85, 800);
       
-      // Ensure blocks are visible with minimum size
-      newSize = Math.max(newSize, isMobile ? 4 : 6);
+      // Consider height constraints to prevent excessive vertical length
+      const maxRows = isMobile ? 70 : 100; // Show fewer rows on mobile
+      const targetHeight = Math.min(viewportHeight * 0.7, maxRows * 8); // Limit vertical height
       
-      // Set sizes
+      // Calculate sizes based on both width and height constraints
+      const widthBasedSize = Math.floor(targetWidth / totalCols);
+      const heightBasedSize = Math.floor(targetHeight / MAX_AGE);
+      
+      // Choose the smaller to ensure no overflow in either direction
+      let newSize = Math.min(widthBasedSize, heightBasedSize);
+      
+      // Set minimum size for visibility
+      newSize = Math.max(newSize, isMobile ? 2 : 3);
+      
+      // Adjust gap based on block size
+      const newGap = newSize > 4 ? 1 : 0;
+      
+      // Update state
       setBlockSize(newSize);
-      setGridGap(isMobile ? 1 : 2);
+      setGridGap(newGap);
     }
     
     // Calculate on mount and when viewport size changes
@@ -45,7 +57,7 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
     window.addEventListener('resize', calculateSizes);
     
     return () => window.removeEventListener('resize', calculateSizes);
-  }, [viewMode, WEEKS_IN_YEAR, MONTHS_IN_YEAR]);
+  }, [viewMode, WEEKS_IN_YEAR, MONTHS_IN_YEAR, MAX_AGE]);
   
   // Get color based on status
   const getBlockColor = (status: BlockStatus): string => {
@@ -123,14 +135,17 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
       </div>
 
       <div className="flex justify-center pb-4">
-        <div className="overflow-auto" style={{ maxWidth: '100%' }}>
+        <div style={{ 
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center'
+        }}>
           <div 
             style={{ 
               display: 'grid',
               gridTemplateColumns: `repeat(${viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR}, ${blockSize}px)`,
               gap: `${gridGap}px`,
-              width: 'fit-content',
-              margin: '0 auto'
+              maxWidth: '100%'
             }}
           >
             {gridData.flatMap((row, rowIndex) => 
