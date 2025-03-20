@@ -8,8 +8,9 @@ interface LifeGridProps {
 type BlockStatus = "past" | "current" | "future";
 
 export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
-  const MAX_AGE = 100;
-  const WEEKS_IN_YEAR = 52;
+  const MAX_AGE = 85; // Reduced from 100 to show fewer years and fit screens better
+  // Reduce columns for weeks view to help with device height fitting
+  const WEEKS_IN_YEAR = 26; // Show every other week instead of all 52
   const MONTHS_IN_YEAR = 12;
   
   // State for responsive sizing
@@ -36,21 +37,21 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
       let widthBasedSize = Math.floor((targetWidth / totalCols) * sizeMultiplier);
       
       // For height, consider visible area of the screen
-      // Adjust the divisor to control how many years are visible at once
-      // For mobile, we want to show about 25-30 years; for desktop about 40-50
-      const visibleYears = isMobile ? 30 : 45;
-      const heightBasedSize = Math.floor(viewportHeight * 0.8 / visibleYears);
+      // Show most of the full life expectancy on screen at once
+      // For mobile, show the whole grid; for desktop show most of it
+      const visibleYears = isMobile ? MAX_AGE : Math.min(MAX_AGE, 60);
+      const heightBasedSize = Math.floor(viewportHeight * 0.85 / visibleYears);
       
       // Choose appropriate size based on view mode and constraints
       let newSize;
       if (viewMode === "months") {
         // For months, prioritize showing larger blocks
-        newSize = Math.min(widthBasedSize, heightBasedSize * 1.2);
-        newSize = Math.max(newSize, isMobile ? 8 : 12); // Minimum size for months
+        newSize = Math.min(widthBasedSize, heightBasedSize * 1.5);
+        newSize = Math.max(newSize, isMobile ? 10 : 14); // Larger minimum size for months
       } else {
         // For weeks, balance between width and height
-        newSize = Math.min(widthBasedSize, heightBasedSize);
-        newSize = Math.max(newSize, isMobile ? 3 : 5); // Minimum size for weeks
+        newSize = Math.min(widthBasedSize, heightBasedSize * 1.2);
+        newSize = Math.max(newSize, isMobile ? 5 : 7); // Larger minimum size for weeks
       }
       
       // Adjust gap based on block size and view mode
@@ -90,7 +91,8 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
         // Calculate the date this block represents
         const blockDate = new Date(birthDate);
         if (viewMode === "weeks") {
-          blockDate.setDate(blockDate.getDate() + year * 52 * 7 + period * 7);
+          // Since we're showing every other week (26 instead of 52), multiply by 2
+          blockDate.setDate(blockDate.getDate() + year * 52 * 7 + period * 14); // 14 days = 2 weeks
         } else {
           blockDate.setMonth(blockDate.getMonth() + year * 12 + period);
         }
@@ -100,7 +102,7 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
         if (blockDate <= today) {
           const nextPeriodDate = new Date(blockDate);
           if (viewMode === "weeks") {
-            nextPeriodDate.setDate(nextPeriodDate.getDate() + 7);
+            nextPeriodDate.setDate(nextPeriodDate.getDate() + 14); // Two weeks for next period
           } else {
             nextPeriodDate.setMonth(nextPeriodDate.getMonth() + 1);
           }
@@ -109,10 +111,15 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
         }
         
         // Create tooltip text
-        const periodLabel = viewMode === "weeks" ? "week" : "month";
-        const tooltip = `Age: ${year} years, ${period + 1} ${periodLabel}s`;
-        
-        rowBlocks.push({ status, tooltip });
+        if (viewMode === "weeks") {
+          // For weeks view, we're showing every other week (biweekly)
+          const weekNumber = (period + 1) * 2;
+          const tooltip = `Age: ${year} years, week ${weekNumber}`;
+          rowBlocks.push({ status, tooltip });
+        } else {
+          const tooltip = `Age: ${year} years, month ${period + 1}`;
+          rowBlocks.push({ status, tooltip });
+        }
       }
       
       rows.push(rowBlocks);
