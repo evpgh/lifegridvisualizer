@@ -9,65 +9,100 @@ type BlockStatus = "past" | "current" | "future";
 
 export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
   const MAX_AGE = 85; // Reduced from 100 to show fewer years and fit screens better
-  // Reduce columns for weeks view to help with device height fitting
-  const WEEKS_IN_YEAR = 26; // Show every other week instead of all 52
-  const MONTHS_IN_YEAR = 12;
   
-  // State for responsive sizing
-  const [blockSize, setBlockSize] = useState(6);
-  const [gridGap, setGridGap] = useState(1);
+  // Fixed block size for consistent, button-like elements
+  const FIXED_BLOCK_SIZE = 6; // Small but clickable size
+  const FIXED_GRID_GAP = 1;   // Minimal gap between blocks
   
-  // Calculate responsive sizes based on viewport
+  // Standard full values
+  const TOTAL_WEEKS_IN_YEAR = 52;
+  const TOTAL_MONTHS_IN_YEAR = 12;
+  
+  // State for responsive column count - how many columns to display
+  const [columnsToShow, setColumnsToShow] = useState({
+    weeks: Math.floor(TOTAL_WEEKS_IN_YEAR / 2), // Default to half the weeks
+    months: TOTAL_MONTHS_IN_YEAR                // Show all months by default
+  });
+  
+  // State for the divider (how many periods to skip)
+  const [periodDivider, setPeriodDivider] = useState({
+    weeks: 2,  // By default show every other week (stride of 2)
+    months: 1  // By default show every month (stride of 1)
+  });
+  
+  // Calculate dynamic column count based on viewport size and fixed block size
   useEffect(() => {
-    function calculateSizes() {
+    function calculateColumns() {
       const isMobile = window.innerWidth < 768;
-      const totalCols = viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR;
       
       // Calculate available viewport dimensions
       const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+      const targetWidth = isMobile ? viewportWidth * 0.95 : Math.min(viewportWidth * 0.9, 800);
       
-      // Target dimensions - scale to fit screen nicely
-      const targetWidth = isMobile ? viewportWidth * 0.95 : Math.min(viewportWidth * 0.85, 900);
+      // Calculate how many columns can fit with fixed block size
+      // Include gap in calculation (FIXED_BLOCK_SIZE + FIXED_GRID_GAP)
+      const columnsPerWidth = Math.floor(targetWidth / (FIXED_BLOCK_SIZE + FIXED_GRID_GAP));
       
-      // Give more space for months view since there are fewer columns
-      const sizeMultiplier = viewMode === "weeks" ? 1 : 1.5;
+      // For weeks view - calculate a ratio of total weeks to show
+      // We want to keep a consistent divisor (4, 2, or 1) for easy understanding
+      let weeksToShow = TOTAL_WEEKS_IN_YEAR; // Start with full year
+      let weekDivider = 1; // Show every week
       
-      // Calculate width-based block size
-      let widthBasedSize = Math.floor((targetWidth / totalCols) * sizeMultiplier);
-      
-      // For height, consider visible area of the screen
-      // Show most of the full life expectancy on screen at once
-      // For mobile, show the whole grid; for desktop show most of it
-      const visibleYears = isMobile ? MAX_AGE : Math.min(MAX_AGE, 60);
-      const heightBasedSize = Math.floor(viewportHeight * 0.85 / visibleYears);
-      
-      // Choose appropriate size based on view mode and constraints
-      let newSize;
-      if (viewMode === "months") {
-        // For months, prioritize showing larger blocks
-        newSize = Math.min(widthBasedSize, heightBasedSize * 1.5);
-        newSize = Math.max(newSize, isMobile ? 10 : 14); // Larger minimum size for months
-      } else {
-        // For weeks, balance between width and height
-        newSize = Math.min(widthBasedSize, heightBasedSize * 1.2);
-        newSize = Math.max(newSize, isMobile ? 5 : 7); // Larger minimum size for weeks
+      if (columnsPerWidth < TOTAL_WEEKS_IN_YEAR) {
+        if (columnsPerWidth >= TOTAL_WEEKS_IN_YEAR / 2) {
+          // Show every other week (26 columns)
+          weeksToShow = Math.floor(TOTAL_WEEKS_IN_YEAR / 2);
+          weekDivider = 2;
+        } else if (columnsPerWidth >= TOTAL_WEEKS_IN_YEAR / 4) {
+          // Show every 4th week (13 columns)
+          weeksToShow = Math.floor(TOTAL_WEEKS_IN_YEAR / 4);
+          weekDivider = 4;
+        } else {
+          // Very small screens - show every 8th week (6-7 columns)
+          weeksToShow = Math.floor(TOTAL_WEEKS_IN_YEAR / 8);
+          weekDivider = 8;
+        }
       }
       
-      // Adjust gap based on block size and view mode
-      const newGap = viewMode === "weeks" ? (newSize > 6 ? 1 : 0) : (newSize > 10 ? 2 : 1);
+      // For months - try to show all, but reduce if needed
+      let monthsToShow = TOTAL_MONTHS_IN_YEAR;
+      let monthDivider = 1; // Show every month
       
-      // Update state
-      setBlockSize(newSize);
-      setGridGap(newGap);
+      if (columnsPerWidth < TOTAL_MONTHS_IN_YEAR) {
+        if (columnsPerWidth >= TOTAL_MONTHS_IN_YEAR / 2) {
+          // Show every other month (6 columns)
+          monthsToShow = Math.floor(TOTAL_MONTHS_IN_YEAR / 2);
+          monthDivider = 2;
+        } else if (columnsPerWidth >= TOTAL_MONTHS_IN_YEAR / 3) {
+          // Show every 3rd month (4 columns) - quarterly view
+          monthsToShow = Math.floor(TOTAL_MONTHS_IN_YEAR / 3);
+          monthDivider = 3;
+        } else {
+          // Very small screens - show every 4th month (3 columns)
+          monthsToShow = Math.floor(TOTAL_MONTHS_IN_YEAR / 4);
+          monthDivider = 4;
+        }
+      }
+      
+      // Update state with calculated column counts
+      setColumnsToShow({
+        weeks: weeksToShow,
+        months: monthsToShow
+      });
+      
+      // Update dividers (stride)
+      setPeriodDivider({
+        weeks: weekDivider,
+        months: monthDivider
+      });
     }
     
     // Calculate on mount and when viewport size changes
-    calculateSizes();
-    window.addEventListener('resize', calculateSizes);
+    calculateColumns();
+    window.addEventListener('resize', calculateColumns);
     
-    return () => window.removeEventListener('resize', calculateSizes);
-  }, [viewMode, WEEKS_IN_YEAR, MONTHS_IN_YEAR, MAX_AGE]);
+    return () => window.removeEventListener('resize', calculateColumns);
+  }, []);
   
   // Get color based on status
   const getBlockColor = (status: BlockStatus): string => {
@@ -78,23 +113,30 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
     }
   };
   
-  // Generate grid data
+  // Generate grid data - now with proper dynamic columns
   const gridData = useMemo(() => {
     const today = new Date();
     const rows = [];
-    const periodsPerRow = viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR;
+    
+    // Get the number of columns and the period divider (stride) based on view mode
+    const colCount = viewMode === "weeks" ? columnsToShow.weeks : columnsToShow.months;
+    const divider = viewMode === "weeks" ? periodDivider.weeks : periodDivider.months;
     
     for (let year = 0; year < MAX_AGE; year++) {
       const rowBlocks = [];
       
-      for (let period = 0; period < periodsPerRow; period++) {
+      for (let colIndex = 0; colIndex < colCount; colIndex++) {
+        // Convert column index to actual period based on the divider (stride)
+        const actualPeriodIndex = colIndex * divider;
+        
         // Calculate the date this block represents
         const blockDate = new Date(birthDate);
         if (viewMode === "weeks") {
-          // Since we're showing every other week (26 instead of 52), multiply by 2
-          blockDate.setDate(blockDate.getDate() + year * 52 * 7 + period * 14); // 14 days = 2 weeks
+          // Calculate week based on stride
+          blockDate.setDate(blockDate.getDate() + year * TOTAL_WEEKS_IN_YEAR * 7 + actualPeriodIndex * 7);
         } else {
-          blockDate.setMonth(blockDate.getMonth() + year * 12 + period);
+          // Calculate month based on stride
+          blockDate.setMonth(blockDate.getMonth() + year * TOTAL_MONTHS_IN_YEAR + actualPeriodIndex);
         }
         
         // Determine status
@@ -102,31 +144,36 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
         if (blockDate <= today) {
           const nextPeriodDate = new Date(blockDate);
           if (viewMode === "weeks") {
-            nextPeriodDate.setDate(nextPeriodDate.getDate() + 14); // Two weeks for next period
+            // Add one stride's worth of days
+            nextPeriodDate.setDate(nextPeriodDate.getDate() + (7 * divider));
           } else {
-            nextPeriodDate.setMonth(nextPeriodDate.getMonth() + 1);
+            // Add one stride's worth of months
+            nextPeriodDate.setMonth(nextPeriodDate.getMonth() + divider);
           }
           
           status = today < nextPeriodDate ? "current" : "past";
         }
         
         // Create tooltip text
+        let tooltip;
         if (viewMode === "weeks") {
-          // For weeks view, we're showing every other week (biweekly)
-          const weekNumber = (period + 1) * 2;
-          const tooltip = `Age: ${year} years, week ${weekNumber}`;
-          rowBlocks.push({ status, tooltip });
+          // For weeks view - show actual week number
+          const weekNumber = actualPeriodIndex + 1;
+          tooltip = `Age: ${year} years, week ${weekNumber}`;
         } else {
-          const tooltip = `Age: ${year} years, month ${period + 1}`;
-          rowBlocks.push({ status, tooltip });
+          // For months view
+          const monthNumber = actualPeriodIndex + 1;
+          tooltip = `Age: ${year} years, month ${monthNumber}`;
         }
+        
+        rowBlocks.push({ status, tooltip });
       }
       
       rows.push(rowBlocks);
     }
     
     return rows;
-  }, [birthDate, viewMode]);
+  }, [birthDate, viewMode, columnsToShow, periodDivider]);
 
   return (
     <div className="mb-6">
@@ -159,8 +206,9 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
           <div 
             style={{ 
               display: 'grid',
-              gridTemplateColumns: `repeat(${viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR}, ${blockSize}px)`,
-              gap: `${gridGap}px`,
+              // Use the dynamic column count from our state
+              gridTemplateColumns: `repeat(${viewMode === "weeks" ? columnsToShow.weeks : columnsToShow.months}, ${FIXED_BLOCK_SIZE}px)`,
+              gap: `${FIXED_GRID_GAP}px`,
               maxWidth: '100%'
             }}
           >
@@ -169,9 +217,10 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
                 <div
                   key={`${rowIndex}-${blockIndex}`}
                   style={{ 
-                    width: `${blockSize}px`, 
-                    height: `${blockSize}px`, 
-                    backgroundColor: getBlockColor(block.status)
+                    width: `${FIXED_BLOCK_SIZE}px`, 
+                    height: `${FIXED_BLOCK_SIZE}px`, 
+                    backgroundColor: getBlockColor(block.status),
+                    cursor: 'pointer' // Add pointer cursor for better UX
                   }}
                   title={block.tooltip}
                 />
