@@ -27,25 +27,34 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
       const viewportHeight = window.innerHeight;
       
       // Target dimensions - scale to fit screen nicely
-      // Use slightly less width to avoid horizontal scrolling
-      const targetWidth = isMobile ? viewportWidth * 0.9 : Math.min(viewportWidth * 0.85, 800);
+      const targetWidth = isMobile ? viewportWidth * 0.95 : Math.min(viewportWidth * 0.85, 900);
       
-      // Consider height constraints to prevent excessive vertical length
-      const maxRows = isMobile ? 70 : 100; // Show fewer rows on mobile
-      const targetHeight = Math.min(viewportHeight * 0.7, maxRows * 8); // Limit vertical height
+      // Give more space for months view since there are fewer columns
+      const sizeMultiplier = viewMode === "weeks" ? 1 : 1.5;
       
-      // Calculate sizes based on both width and height constraints
-      const widthBasedSize = Math.floor(targetWidth / totalCols);
-      const heightBasedSize = Math.floor(targetHeight / MAX_AGE);
+      // Calculate width-based block size
+      let widthBasedSize = Math.floor((targetWidth / totalCols) * sizeMultiplier);
       
-      // Choose the smaller to ensure no overflow in either direction
-      let newSize = Math.min(widthBasedSize, heightBasedSize);
+      // For height, consider visible area of the screen
+      // Adjust the divisor to control how many years are visible at once
+      // For mobile, we want to show about 25-30 years; for desktop about 40-50
+      const visibleYears = isMobile ? 30 : 45;
+      const heightBasedSize = Math.floor(viewportHeight * 0.8 / visibleYears);
       
-      // Set minimum size for visibility
-      newSize = Math.max(newSize, isMobile ? 2 : 3);
+      // Choose appropriate size based on view mode and constraints
+      let newSize;
+      if (viewMode === "months") {
+        // For months, prioritize showing larger blocks
+        newSize = Math.min(widthBasedSize, heightBasedSize * 1.2);
+        newSize = Math.max(newSize, isMobile ? 8 : 12); // Minimum size for months
+      } else {
+        // For weeks, balance between width and height
+        newSize = Math.min(widthBasedSize, heightBasedSize);
+        newSize = Math.max(newSize, isMobile ? 3 : 5); // Minimum size for weeks
+      }
       
-      // Adjust gap based on block size
-      const newGap = newSize > 4 ? 1 : 0;
+      // Adjust gap based on block size and view mode
+      const newGap = viewMode === "weeks" ? (newSize > 6 ? 1 : 0) : (newSize > 10 ? 2 : 1);
       
       // Update state
       setBlockSize(newSize);
