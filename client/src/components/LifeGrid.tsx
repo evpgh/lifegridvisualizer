@@ -22,22 +22,22 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
       const isMobile = window.innerWidth < 768;
       const totalCols = viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR;
       
-      // Calculate optimal block size to fit the screen
-      const availableWidth = window.innerWidth * 0.9; // 90% of viewport width
-      const availableHeight = window.innerHeight * 0.7; // 70% of viewport height
+      // Calculate desired grid width
+      // For mobile: almost full screen width (95%)
+      // For desktop: at least 500px or 50% of screen width, whichever is larger
+      const targetWidth = isMobile 
+        ? window.innerWidth * 0.95 
+        : Math.max(500, window.innerWidth * 0.5);
       
-      const widthBasedSize = Math.floor(availableWidth / totalCols);
-      const heightBasedSize = Math.floor(availableHeight / MAX_AGE);
+      // Calculate block size based on target width
+      let newSize = Math.floor(targetWidth / totalCols) - (isMobile ? 0.5 : 1);
       
-      // Choose the smaller of the two to ensure grid fits on screen
-      let newSize = Math.min(widthBasedSize, heightBasedSize);
-      
-      // Enforce minimum sizes
-      newSize = Math.max(newSize, isMobile ? 3 : 5);
+      // Ensure blocks are visible with minimum size
+      newSize = Math.max(newSize, isMobile ? 4 : 6);
       
       // Set sizes
       setBlockSize(newSize);
-      setGridGap(newSize > 5 ? 2 : 1);
+      setGridGap(isMobile ? 1 : 2);
     }
     
     // Calculate on mount and when viewport size changes
@@ -45,7 +45,7 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
     window.addEventListener('resize', calculateSizes);
     
     return () => window.removeEventListener('resize', calculateSizes);
-  }, [viewMode]);
+  }, [viewMode, WEEKS_IN_YEAR, MONTHS_IN_YEAR]);
   
   // Get color based on status
   const getBlockColor = (status: BlockStatus): string => {
@@ -122,28 +122,31 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
         </div>
       </div>
 
-      <div className="overflow-auto pb-4" style={{ maxWidth: '100%' }}>
-        <div 
-          style={{ 
-            display: 'grid',
-            gridTemplateColumns: `repeat(${viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR}, ${blockSize}px)`,
-            gap: `${gridGap}px`,
-            width: 'fit-content'
-          }}
-        >
-          {gridData.flatMap((row, rowIndex) => 
-            row.map((block, blockIndex) => (
-              <div
-                key={`${rowIndex}-${blockIndex}`}
-                style={{ 
-                  width: `${blockSize}px`, 
-                  height: `${blockSize}px`, 
-                  backgroundColor: getBlockColor(block.status)
-                }}
-                title={block.tooltip}
-              />
-            ))
-          )}
+      <div className="flex justify-center pb-4">
+        <div className="overflow-auto" style={{ maxWidth: '100%' }}>
+          <div 
+            style={{ 
+              display: 'grid',
+              gridTemplateColumns: `repeat(${viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR}, ${blockSize}px)`,
+              gap: `${gridGap}px`,
+              width: 'fit-content',
+              margin: '0 auto'
+            }}
+          >
+            {gridData.flatMap((row, rowIndex) => 
+              row.map((block, blockIndex) => (
+                <div
+                  key={`${rowIndex}-${blockIndex}`}
+                  style={{ 
+                    width: `${blockSize}px`, 
+                    height: `${blockSize}px`, 
+                    backgroundColor: getBlockColor(block.status)
+                  }}
+                  title={block.tooltip}
+                />
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
