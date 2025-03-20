@@ -33,56 +33,44 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
   // Calculate dynamic column count based on viewport size and fixed block size
   useEffect(() => {
     function calculateColumns() {
-      const isMobile = window.innerWidth < 768;
-      
       // Calculate available viewport dimensions
       const viewportWidth = window.innerWidth;
-      const targetWidth = isMobile ? viewportWidth * 0.95 : Math.min(viewportWidth * 0.9, 800);
       
-      // Calculate how many columns can fit with fixed block size
-      // Include gap in calculation (FIXED_BLOCK_SIZE + FIXED_GRID_GAP)
-      const columnsPerWidth = Math.floor(targetWidth / (FIXED_BLOCK_SIZE + FIXED_GRID_GAP));
+      // We'll use a different approach - figure out how many columns will fit
+      // and limit the maximum number
       
-      // For weeks view - calculate a ratio of total weeks to show
-      // We want to keep a consistent divisor (4, 2, or 1) for easy understanding
-      let weeksToShow = TOTAL_WEEKS_IN_YEAR; // Start with full year
-      let weekDivider = 1; // Show every week
+      // For better usability, increase fixed block size just a bit
+      const actualBlockSize = FIXED_BLOCK_SIZE + 1; // Just a bit larger (+1px)
+      const actualGapSize = FIXED_GRID_GAP;
       
-      if (columnsPerWidth < TOTAL_WEEKS_IN_YEAR) {
-        if (columnsPerWidth >= TOTAL_WEEKS_IN_YEAR / 2) {
-          // Show every other week (26 columns)
-          weeksToShow = Math.floor(TOTAL_WEEKS_IN_YEAR / 2);
-          weekDivider = 2;
-        } else if (columnsPerWidth >= TOTAL_WEEKS_IN_YEAR / 4) {
-          // Show every 4th week (13 columns)
-          weeksToShow = Math.floor(TOTAL_WEEKS_IN_YEAR / 4);
-          weekDivider = 4;
-        } else {
-          // Very small screens - show every 8th week (6-7 columns)
-          weeksToShow = Math.floor(TOTAL_WEEKS_IN_YEAR / 8);
-          weekDivider = 8;
-        }
-      }
+      // Calculate max content width - give some margins
+      const contentWidth = viewportWidth * 0.98; // Use nearly full width (98%)
       
-      // For months - try to show all, but reduce if needed
-      let monthsToShow = TOTAL_MONTHS_IN_YEAR;
-      let monthDivider = 1; // Show every month
+      // Max columns that can fit - this is our adaptive approach
+      const maxColumns = Math.floor(contentWidth / (actualBlockSize + actualGapSize));
       
-      if (columnsPerWidth < TOTAL_MONTHS_IN_YEAR) {
-        if (columnsPerWidth >= TOTAL_MONTHS_IN_YEAR / 2) {
-          // Show every other month (6 columns)
-          monthsToShow = Math.floor(TOTAL_MONTHS_IN_YEAR / 2);
-          monthDivider = 2;
-        } else if (columnsPerWidth >= TOTAL_MONTHS_IN_YEAR / 3) {
-          // Show every 3rd month (4 columns) - quarterly view
-          monthsToShow = Math.floor(TOTAL_MONTHS_IN_YEAR / 3);
-          monthDivider = 3;
-        } else {
-          // Very small screens - show every 4th month (3 columns)
-          monthsToShow = Math.floor(TOTAL_MONTHS_IN_YEAR / 4);
-          monthDivider = 4;
-        }
-      }
+      // For weeks view - we want to show as many columns as possible
+      // but not more than 30 for UI clarity and not fewer than 12
+      let weeksToShow = Math.min(maxColumns, 30); // Cap at 30 columns max
+      weeksToShow = Math.max(weeksToShow, 12);    // Ensure at least 12 columns
+      
+      // Calculate week divider - how many weeks to skip
+      // e.g., if divider is 2, we show every 2nd week
+      let weekDivider = Math.ceil(TOTAL_WEEKS_IN_YEAR / weeksToShow);
+      
+      // Adjust the number of columns based on calculated divider
+      weeksToShow = Math.ceil(TOTAL_WEEKS_IN_YEAR / weekDivider);
+      
+      // For months - we always want to show at least 6 columns (bi-monthly)
+      // and at most 12 (monthly)
+      let monthsToShow = Math.min(maxColumns, TOTAL_MONTHS_IN_YEAR);
+      monthsToShow = Math.max(monthsToShow, 6); // Ensure at least 6 columns for months
+      
+      // Calculate month divider - how many months to skip
+      let monthDivider = Math.ceil(TOTAL_MONTHS_IN_YEAR / monthsToShow);
+      
+      // Adjust months to show based on calculated divider
+      monthsToShow = Math.ceil(TOTAL_MONTHS_IN_YEAR / monthDivider);
       
       // Update state with calculated column counts
       setColumnsToShow({
@@ -197,11 +185,12 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
         </div>
       </div>
 
-      <div className="flex justify-center pb-4">
+      <div className="flex justify-center pb-4 overflow-hidden">
         <div style={{ 
           width: '100%',
           display: 'flex',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          overflowX: 'hidden' // Prevent any horizontal overflow
         }}>
           <div 
             style={{ 
@@ -209,7 +198,8 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
               // Use the dynamic column count from our state
               gridTemplateColumns: `repeat(${viewMode === "weeks" ? columnsToShow.weeks : columnsToShow.months}, ${FIXED_BLOCK_SIZE}px)`,
               gap: `${FIXED_GRID_GAP}px`,
-              maxWidth: '100%'
+              maxWidth: '100%',
+              margin: '0 auto' // Center the grid
             }}
           >
             {gridData.flatMap((row, rowIndex) => 
