@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, Fragment } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LifeGridProps {
@@ -8,87 +8,63 @@ interface LifeGridProps {
 
 type BlockStatus = "past" | "current" | "future";
 
-interface Block {
-  year: number;
-  period: number;
-  status: BlockStatus;
-  tooltip: string;
-}
-
 export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
-  const [blocks, setBlocks] = useState<Block[][]>([]);
   const MAX_AGE = 100;
   const WEEKS_IN_YEAR = 52;
   const MONTHS_IN_YEAR = 12;
+  
+  // Calculate block status based on dates
+  const calculateBlockStatus = (blockDate: Date, today: Date, viewMode: string): BlockStatus => {
+    if (blockDate > today) return "future";
+    
+    const nextPeriodDate = new Date(blockDate);
+    if (viewMode === "weeks") {
+      nextPeriodDate.setDate(nextPeriodDate.getDate() + 7);
+    } else {
+      nextPeriodDate.setMonth(nextPeriodDate.getMonth() + 1);
+    }
+    
+    return today >= blockDate && today < nextPeriodDate ? "current" : "past";
+  };
 
-  useEffect(() => {
+  // Get color for block status - no hover effects
+  const getBlockColor = (status: BlockStatus) => {
+    switch (status) {
+      case "past": return "bg-[#94A3B8]";
+      case "current": return "bg-[#3B82F6]";
+      case "future": return "bg-[#E2E8F0]";
+    }
+  };
+  
+  // Memoized grid generation for better performance
+  const grid = useMemo(() => {
     const today = new Date();
-    const birthDateCopy = new Date(birthDate);
-    const blocksPerYear = viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR;
-    const newBlocks: Block[][] = [];
-
-    // Create grid for each year (0-100)
+    const rows = [];
+    const periodsPerRow = viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR;
+    
     for (let year = 0; year < MAX_AGE; year++) {
-      const yearBlocks: Block[] = [];
-
-      // Generate blocks for each period (week or month) in this year
-      for (let period = 0; period < blocksPerYear; period++) {
-        // Calculate the date this block represents
-        const blockDate = new Date(birthDateCopy);
+      const row = [];
+      
+      for (let period = 0; period < periodsPerRow; period++) {
+        const blockDate = new Date(birthDate);
         if (viewMode === "weeks") {
           blockDate.setDate(blockDate.getDate() + year * 52 * 7 + period * 7);
         } else {
           blockDate.setMonth(blockDate.getMonth() + year * 12 + period);
         }
-
-        // Determine if this block is in the past, present, or future
-        let status: BlockStatus;
-        if (blockDate > today) {
-          status = "future";
-        } else {
-          // Calculate if this is the current week/month
-          const nextPeriodDate = new Date(blockDate);
-          if (viewMode === "weeks") {
-            nextPeriodDate.setDate(nextPeriodDate.getDate() + 7);
-          } else {
-            nextPeriodDate.setMonth(nextPeriodDate.getMonth() + 1);
-          }
-
-          if (today >= blockDate && today < nextPeriodDate) {
-            status = "current";
-          } else {
-            status = "past";
-          }
-        }
-
-        // Create tooltip text
+        
+        const status = calculateBlockStatus(blockDate, today, viewMode);
         const periodLabel = viewMode === "weeks" ? "week" : "month";
         const tooltip = `Age: ${year} years, ${period + 1} ${periodLabel}s`;
-
-        yearBlocks.push({
-          year,
-          period: period + 1,
-          status,
-          tooltip,
-        });
+        
+        row.push({ status, tooltip });
       }
-
-      newBlocks.push(yearBlocks);
+      
+      rows.push(row);
     }
-
-    setBlocks(newBlocks);
-  }, [birthDate, viewMode]);
-
-  const getBlockColor = (status: BlockStatus) => {
-    switch (status) {
-      case "past":
-        return "bg-[#94A3B8] hover:bg-[#7c8ba0]";
-      case "current":
-        return "bg-[#3B82F6] hover:bg-[#2563eb]";
-      case "future":
-        return "bg-[#E2E8F0] hover:bg-[#cbd5e1]";
-    }
-  };
+    
+    return rows;
+  }, [birthDate, viewMode, MAX_AGE, WEEKS_IN_YEAR, MONTHS_IN_YEAR]);
 
   return (
     <div className="mb-6 overflow-x-auto">
@@ -98,35 +74,30 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
             Your Life in {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)}
           </h2>
           <div className="ml-4 flex items-center text-sm">
-            <span className="inline-block w-3 h-3 bg-[#94A3B8] rounded-sm mr-1"></span>
+            <span className="inline-block w-3 h-3 bg-[#94A3B8] mr-1"></span>
             <span className="mr-3">Past</span>
-            <span className="inline-block w-3 h-3 bg-[#3B82F6] rounded-sm mr-1"></span>
+            <span className="inline-block w-3 h-3 bg-[#3B82F6] mr-1"></span>
             <span className="mr-3">Current</span>
-            <span className="inline-block w-3 h-3 bg-[#E2E8F0] rounded-sm mr-1"></span>
+            <span className="inline-block w-3 h-3 bg-[#E2E8F0] mr-1"></span>
             <span>Future</span>
           </div>
         </div>
 
         <div 
-          className="grid gap-1"
+          className="grid grid-flow-row gap-0"
           style={{ 
-            gridTemplateColumns: `repeat(${viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR}, minmax(8px, 1fr))` 
+            gridTemplateColumns: `repeat(${viewMode === "weeks" ? WEEKS_IN_YEAR : MONTHS_IN_YEAR}, minmax(3px, 1fr))`,
+            gap: "1px"
           }}
         >
-          {blocks.map((yearBlocks, yearIndex) => (
-            <div key={yearIndex} className="grid-year">
-              {/* Age indicator for first column */}
-              <div className="year-label text-xs text-slate-500 mb-1 sticky left-0">
-                {yearIndex}
-              </div>
-
-              {/* Blocks for this year */}
-              {yearBlocks.map((block, blockIndex) => (
-                <TooltipProvider key={blockIndex}>
+          {grid.map((row, rowIndex) => (
+            <Fragment key={rowIndex}>
+              {row.map((block, blockIndex) => (
+                <TooltipProvider key={`${rowIndex}-${blockIndex}`}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
-                        className={`w-3 h-3 rounded-sm transition-colors ${getBlockColor(block.status)} transform hover:scale-125 hover:ring-1 hover:ring-slate-600`}
+                        className={`w-2 h-2 ${getBlockColor(block.status)}`}
                         title={block.tooltip}
                       />
                     </TooltipTrigger>
@@ -134,7 +105,7 @@ export default function LifeGrid({ birthDate, viewMode }: LifeGridProps) {
                   </Tooltip>
                 </TooltipProvider>
               ))}
-            </div>
+            </Fragment>
           ))}
         </div>
       </div>
