@@ -1,12 +1,44 @@
 document.addEventListener("DOMContentLoaded", function() {
-  const today = new Date();
-  const defaultBirthDate = new Date(today.getFullYear() - 35, today.getMonth(), today.getDate());
-  document.getElementById('birthDate').valueAsDate = defaultBirthDate;
+  const urlParams = new URLSearchParams(window.location.search);
+  const birthDateParam = urlParams.get('bd');
+  const viewModeParam = urlParams.get('vm');
+  const averageLifeExpectancyYearsParam = urlParams.get('le');
+
+  let birthDate;
+  if (birthDateParam) {
+    const [month, day, year] = birthDateParam.split('.').map(Number);
+    birthDate = new Date(year, month - 1, day + 1);
+  } else {
+    const today = new Date();
+    birthDate = new Date(today.getFullYear() - 35, today.getMonth(), today.getDate());
+  }
+
+  document.getElementById('birthDate').valueAsDate = birthDate;
+  document.getElementById('viewMode').value = viewModeParam || 'monthly';
+  document.getElementById('averageLifeExpectancyYears').value = averageLifeExpectancyYearsParam || 80;
 
   document.getElementById('birthDate').addEventListener('change', updateVisualization);
   document.getElementById('viewMode').addEventListener('change', updateVisualization);
   document.getElementById('viewMode').addEventListener('change', updateDescription);
   document.getElementById('averageLifeExpectancyYears').addEventListener('input', updateVisualization);
+
+  function updateURLParams() {
+    const birthDateValue = document.getElementById('birthDate').value.split('-').join('.');
+    const viewModeValue = document.getElementById('viewMode').value;
+    const averageLifeExpectancyYearsValue = document.getElementById('averageLifeExpectancyYears').value;
+
+    const params = new URLSearchParams({
+        'bd': birthDateValue,
+        'vm': viewModeValue,
+        'le': averageLifeExpectancyYearsValue
+    });
+
+    window.history.replaceState({}, '', '?' + params.toString());
+  }
+
+  document.getElementById('birthDate').addEventListener('change', updateURLParams);
+  document.getElementById('viewMode').addEventListener('change', updateURLParams);
+  document.getElementById('averageLifeExpectancyYears').addEventListener('input', updateURLParams);
 
   updateVisualization();
 });
