@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('averageLifeExpectancyYears').addEventListener('input', updateVisualization);
 
   function updateURLParams() {
-    const birthDateValue = document.getElementById('birthDate').value.split('-').join('.');
+    const birthDateValue = document.getElementById('birthDate').value.split('-').reverse().join('.');
     const viewModeValue = document.getElementById('viewMode').value;
     const averageLifeExpectancyYearsValue = document.getElementById('averageLifeExpectancyYears').value;
 
