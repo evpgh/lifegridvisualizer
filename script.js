@@ -3,6 +3,10 @@ document.addEventListener("DOMContentLoaded", function() {
   const defaultBirthDate = new Date(today.getFullYear() - 35, today.getMonth(), today.getDate());
   document.getElementById('birthDate').valueAsDate = defaultBirthDate;
 
+  document.getElementById('birthDate').addEventListener('change', updateVisualization);
+  document.getElementById('viewMode').addEventListener('change', updateVisualization);
+  document.getElementById('averageLifeExpectancyYears').addEventListener('input', updateVisualization);
+
   updateVisualization();
 });
 
@@ -21,7 +25,7 @@ function updateVisualization() {
   const lifeSpanEnd = new Date(birthDate.getTime() + averageLifeExpectancyMilliseconds);
 
   let currentDate = birthDate;
-  const blocksDiv = document.getElementById('blocks');
+  const blocksDiv = document.getElementById('visualization');
   blocksDiv.innerHTML = '';
 
   while (currentDate < lifeSpanEnd) {
