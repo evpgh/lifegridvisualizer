@@ -5,10 +5,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
   document.getElementById('birthDate').addEventListener('change', updateVisualization);
   document.getElementById('viewMode').addEventListener('change', updateVisualization);
+  document.getElementById('viewMode').addEventListener('change', updateDescription);
   document.getElementById('averageLifeExpectancyYears').addEventListener('input', updateVisualization);
 
   updateVisualization();
 });
+
+function updateDescription() {
+  const viewModeSelect = document.getElementById('viewMode');
+  const descriptionElement = document.getElementById('description');
+  const viewModeValue = viewModeSelect.value;
+
+  if (viewModeValue == 'monthly') {
+    descriptionElement.textContent = 'Each square represents one month of your life.';
+  } else if (viewModeValue == 'weekly') {
+    descriptionElement.textContent = 'Each square represents one week of your life.';
+  }
+}
 
 function updateVisualization() {
   const birthDateInput = document.getElementById('birthDate');

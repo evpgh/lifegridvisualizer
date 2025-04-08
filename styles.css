@@ -90,6 +90,11 @@ img {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+@media (min-width: 768px) {
+  .controls {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
 button {
   padding: 5px;
 }
