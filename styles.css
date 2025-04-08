@@ -94,6 +94,7 @@ img {
   .controls {
     grid-template-columns: repeat(6, 1fr);
   }
+}
 
 button {
   padding: 5px;
