@@ -3,26 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Life in Months helps you visualize your life journey in weeks and months. Our simple tool brings perspective to your past and intention to your future.">
-    <meta name="keywords" content="life visualization, life in months, life in weeks, life calendar, life planning, life grid visualization">
+    <meta name="description" content="Visualize your life journey with our life calendar. See your life in months and weeks to gain clarity, set goals, and live intentionally.">
+    <meta name="keywords" content="time your life, time your life in months, life in months, life in weeks, life calendar, life planning, life grid visualization, present moment">
     <meta name="author" content="Life in Months">
     <meta property="og:title" content="Life in Months - Visualize Your Life Journey">
-    <meta property="og:description" content="See your entire life at a glance. Our simple tool helps you visualize your life in months and weeks, bringing perspective and intention to your journey.">
-    <meta property="og:image" content="/api/placeholder/1200/630">
+    <meta property="og:description" content="My life calendar in weeks. Visualize your life in months and weeks, bringing perspective and intention to your journey.">
+    <meta property="og:image" content="https://lifeinmonths.com/life-calendar.png" alt="Life Calendar - Visualize your life in months and weeks">
     <meta property="og:url" content="https://lifeinmonths.com">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-    <title>Life in Months - Visualize Your Life Journey</title>
+    <title>Life Calendar – Visualize Your Life in Months and Weeks</title>
     <link rel="canonical" href="https://lifeinmonths.com">
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 </head>
 <body>
     <section class="hero">
         <div class="container">
-            <h1>Visualize Your Life Journey</h1>
+            <h1 id="title">Time Your Life in Months - Life Calendar</h1>
             <p id="description" style="font-size: 1.2rem; max-width: 800px; margin: 1rem auto;">Each square represents one month of your life. </p>
             <p style="font-size: 1.2rem; max-width: 800px; margin: 1rem auto;">Reflect on where you've been and where you're going—all at once.</p>
-            <a href="#visualization" class="cta-button">Visualize Your Life</a>
+            <a href="#visualization" class="cta-button">Create Your Life Calendar Now</a>
         </div>
     </section>
     <div class="controls">
@@ -38,7 +43,6 @@
             <option value="weekly">Weekly</option>
         </select>
     </div>
-
     <section id="how-it-works">
         <div class="container">
             <h2 style="text-align: center; margin-bottom: 2rem; margin-top: 4rem;">How Life in Months Works</h2>
@@ -54,7 +58,7 @@
                 </div>
                 <div>
                     <h3>3. Gain Perspective</h3>
-                    <p>See your past achievements, present moment, and future possibilities all at once. Understand where you are in your own story.</p>
+                    <p>Make decisions towards life, present moment, and future possibilities all at once. Understand where you are in your own story.</p>
                 </div>
             </div>
         </div>
@@ -63,7 +67,7 @@
     <div id="visualization" class="visualization"></div>
 
     <section class="container" style="padding: 4rem 1rem; text-align: center;">
-        <h2>Why Visualize Your Life?</h2>
+        <h2>Make time</h2>
         <p style="max-width: 800px; margin: 0 auto 2rem;">Time is our most valuable resource, yet it's often invisible. Life in Months makes the abstract concrete.</p>
         
         <div class="grid-section">
@@ -84,7 +88,7 @@
 
     <section id="testimonials" style="background-color: #f9f9f9; padding: 4rem 0;">
         <div class="container">
-            <h2 style="text-align: center; margin-bottom: 2rem;">Life-Changing Perspectives</h2>
+            <h2 style="text-align: center; margin-bottom: 2rem;">Your Time</h2>
             
             <div class="grid-section">
                 <div class="testimonial">
@@ -104,7 +108,11 @@
     </section>
 
     <section id="faq" class="container" style="padding: 4rem 1rem;">
-        <h2 style="text-align: center; margin-bottom: 2rem;">Frequently Asked Questions</h2>
+        <h2>What is a Life Calendar?</h2>
+        <p>A life calendar is a way to visualize your life in weeks or months, helping you reflect and plan intentionally.</p>
+
+        <h2>Why Visualize Your Life in Months?</h2>
+        <p>Seeing each month of your life laid out helps you appreciate your time, stay focused, and make better choices.</p>
         
         <div class="faq-item">
             <h3>Is this meant to be depressing?</h3>
@@ -125,6 +133,7 @@
             <h3>Is my data private?</h3>
             <p>Absolutely. We ask for your birthdate to create the visualization, but this is a static page and we don't store any information.</p>
         </div>
+        <a href="#visualization" class="cta-button">Ready to get started? Create your Life Calendar now.</a>
     </section>
     <footer>
         <div class="container">
@@ -133,5 +142,14 @@
         </div>
     </footer>
     <script src="script.js"></script>
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Life in Months",
+          "url": "https://lifeinmonths.com",
+          "description": "Visualize your life in months and weeks with a life calendar. Gain perspective and live with intention."
+        }
+    </script>
 </body>
 </html>

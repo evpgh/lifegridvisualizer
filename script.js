@@ -46,12 +46,15 @@ document.addEventListener("DOMContentLoaded", function() {
 function updateDescription() {
   const viewModeSelect = document.getElementById('viewMode');
   const descriptionElement = document.getElementById('description');
+  const titleElement = document.getElementById('title');
   const viewModeValue = viewModeSelect.value;
 
   if (viewModeValue == 'monthly') {
     descriptionElement.textContent = 'Each square represents one month of your life.';
+    titleElement.textContent = "Time Your Life in Months";
   } else if (viewModeValue == 'weekly') {
     descriptionElement.textContent = 'Each square represents one week of your life.';
+    titleElement.textContent = "Time Your Life in Weeks";
   }
 }
 
